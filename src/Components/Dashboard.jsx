@@ -38,7 +38,11 @@ const Dashboard = () => {
     const handleLogout = () => {
       navigate('/');
     };
-  
+
+    // useEffect(() => {
+    //   fetchImages(setImages); 
+    // }, []);
+    
     const handleBulkUpload = async (event) => {
         event.preventDefault();
         const files =selectedFiles;  

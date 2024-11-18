@@ -1,7 +1,10 @@
-import React, { useState } from 'react'
+import React, { useState ,useEffect} from 'react'
 import axios from 'axios';
 import loginImage from '../images/freepik__upload__23414.jpeg';
 import { useNavigate } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
+
+
 
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -10,6 +13,29 @@ const Login = () => {
     const [password,setPassword]=useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
+  
+    useEffect (()=>{
+      const token=localStorage.getItem("token");
+      if (token) {
+        try {
+          const decodedToken = jwtDecode(token);
+          console.log("Decoded token:", decodedToken);
+          if (decodedToken.exp * 1000 < Date.now()) {
+            console.log("Token is expired");
+            localStorage.removeItem("token"); // Clear expired token
+            navigate("/"); // Redirect to login
+          }
+        } catch (error) {
+          console.error("Invalid token:", error);
+          localStorage.removeItem("token"); 
+          navigate("/"); 
+        }
+      }  else {
+        console.log("No token found. Redirecting to login.");
+        navigate("/"); 
+      }
+    },[navigate]);
+
 
     const handleSubmit =async (e) => {
         e.preventDefault();

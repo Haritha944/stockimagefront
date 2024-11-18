@@ -15,48 +15,88 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const ImageGallery = () => {
   const [images, setImages] = useState([]);
 
+  const fetchImages = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${API_BASE_URL}images/`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      setImages(response.data); // Ensure the images are sorted by order on the backend
+    } catch (error) {
+      console.error('Error fetching images:', error);
+    }
+  };
+
   useEffect(() => {
-    // Fetch images from the backend
-    axios
-      .get(`${API_BASE_URL}images/`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem("token")}`
-        }
-      })
-      .then(response => setImages(response.data))
-      .catch((error) => console.error('Error fetching images', error));
+    fetchImages();
   }, []);
 
   // Handle the end of a drag
-  const handleDragEnd = (event) => {
+  // const handleDragEnd =async (event) => {
+  //   const { active, over } = event;
+
+  //   if (active.id !== over.id) {
+  //     const oldIndex = images.findIndex((img) => img.id === active.id);
+  //     const newIndex = images.findIndex((img) => img.id === over.id);
+  //     const reorderedImages = arrayMove(images, oldIndex, newIndex);
+
+  //     setImages(reorderedImages);
+
+  //     // Send the new order to the backend
+  //     const reorderedIds = reorderedImages.map((image) => image.id);
+  //     axios
+  //       .patch(`${API_BASE_URL}images/reorder_images/`, { order: reorderedIds },
+  //         {  headers: {
+  //               'Authorization': `Bearer ${localStorage.getItem("token")}`
+  //             }}
+  //       )
+  //       .then(response => {
+  //           console.log('Order updated');
+  //           axios.get(`${API_BASE_URL}images/`, {
+  //               headers: {
+  //                   Authorization: `Bearer ${localStorage.getItem("token")}`
+  //               }
+  //           })
+  //           .then(freshResponse => setImages(freshResponse.data))
+  //           .catch(fetchError => console.error('Error re-fetching images', fetchError));
+  //       })
+  //       .catch((error) => console.error('Error updating order', error));
+  //   }
+  // };
+  const handleDragEnd = async (event) => {
     const { active, over } = event;
 
     if (active.id !== over.id) {
+      // Find the old and new indices
       const oldIndex = images.findIndex((img) => img.id === active.id);
       const newIndex = images.findIndex((img) => img.id === over.id);
-      const reorderedImages = arrayMove(images, oldIndex, newIndex);
 
+      // Update the images array with the new order
+      const reorderedImages = arrayMove(images, oldIndex, newIndex);
+      console.log('Images after reorder:', reorderedImages); 
       setImages(reorderedImages);
 
       // Send the new order to the backend
       const reorderedIds = reorderedImages.map((image) => image.id);
-      axios
-        .patch(`${API_BASE_URL}images/reorder_images/`, { order: reorderedIds },
-          {  headers: {
-                'Authorization': `Bearer ${localStorage.getItem("token")}`
-              }}
-        )
-        .then(response => {
-            console.log('Order updated');
-            axios.get(`${API_BASE_URL}images/`, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem("token")}`
-                }
-            })
-            .then(freshResponse => setImages(freshResponse.data))
-            .catch(fetchError => console.error('Error re-fetching images', fetchError));
-        })
-        .catch((error) => console.error('Error updating order', error));
+
+      try {
+       const response= await axios.patch(
+          `${API_BASE_URL}images/reorder_images/`,
+          { order: reorderedIds },
+          {
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+        console.log('Order updated successfully',response.data);
+        const updatedImagesResponse = await axios.get(`${API_BASE_URL}images`);
+        setImages(updatedImagesResponse.data.images); 
+       
+      } catch (error) {
+        console.error('Error updating order', error);
+        
+      }
     }
   };
 

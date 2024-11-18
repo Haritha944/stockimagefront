@@ -15,10 +15,10 @@ export const fetchImages = async () => {
           'Authorization': `Bearer ${token}`,
       },
   });
-    return response.data; 
+  return response.data;
   } catch (error) {
     console.error('Error fetching images:', error);
-    return [];
+    
   }
 };
 
