@@ -176,7 +176,30 @@ const handleSaveEdit = async () => {
       const handleRearrangeClick = () => {
         setIsRearrangeMode(!isRearrangeMode);
       }; 
+
+      useEffect(() => {
+        if (!isRearrangeMode) {
+          // Fetch images when rearrange mode is turned off
+          const fetchImagesFromAPI = async () => {
+            try {
+              const response = await axios.get(`${API_BASE_URL}images/`,{
+                headers: {
+                  Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+              });
+              if (response.status === 200) {
+                setImages(response.data); // Update images state
+              }
+            } catch (error) {
+              console.error('Error fetching images:', error);
+            }
+          };
       
+          fetchImagesFromAPI();
+        }
+      }, [isRearrangeMode]); // Runs whenever isRearrangeMode changes
+      
+  
   return (
     <div className="min-h-screen flex flex-col bg-blue-100">
     {/* Navbar */}

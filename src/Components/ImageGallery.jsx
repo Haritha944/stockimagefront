@@ -90,14 +90,21 @@ const ImageGallery = () => {
           }
         );
         console.log('Order updated successfully',response.data);
-        const updatedImagesResponse = await axios.get(`${API_BASE_URL}images`);
-        setImages(updatedImagesResponse.data.images); 
+        const updatedImagesResponse = await axios.get(`${API_BASE_URL}images`,{
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+        console.log(updatedImagesResponse.data)
+        setImages(updatedImagesResponse.data); 
+        
        
       } catch (error) {
         console.error('Error updating order', error);
         
       }
     }
+   
   };
 
   return (
