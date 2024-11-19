@@ -2,6 +2,7 @@ import React,{useEffect,useState} from 'react'
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom'
 import loginImage from '../images/1.png';
+import { jwtDecode } from 'jwt-decode';
 import {bulkUploadImages,fetchImages,getLastUploadDate } from '../utils/api'; // Import your API methods
 import Modal from './Modal'
 import ImageGallery from './ImageGallery';
@@ -23,8 +24,26 @@ const Dashboard = () => {
     const [editTitle, setEditTitle] = useState('');
     const [isRearrangeMode, setIsRearrangeMode] = useState(false);
    
+    const verifyToken = () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        navigate("/login");
+        return false;
+      }
   
+      // Add token verification logic (e.g., expiration check)
+      const decodedToken = jwtDecode(token);
+      const currentTime = Date.now() / 1000;
+  
+      if (decodedToken.exp < currentTime) {
+        navigate("/login"); // Redirect to login if token is expired
+        return false;
+      }
+  
+      return true;
+    };
     useEffect(() => {
+      if (!verifyToken()) return;
       const initializeData = async () => {
         const fetchedImages = await fetchImages();
         const uploadDate = await getLastUploadDate();
@@ -39,9 +58,7 @@ const Dashboard = () => {
       navigate('/');
     };
 
-    // useEffect(() => {
-    //   fetchImages(setImages); 
-    // }, []);
+   
     
     const handleBulkUpload = async (event) => {
         event.preventDefault();

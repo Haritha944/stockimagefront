@@ -22,7 +22,8 @@ const Login = () => {
           console.log("Decoded token:", decodedToken);
           if (decodedToken.exp * 1000 < Date.now()) {
             console.log("Token is expired");
-            localStorage.removeItem("token"); // Clear expired token
+            localStorage.removeItem("token");
+            refreshAccessToken(); // Clear expired token
             navigate("/"); // Redirect to login
           }
         } catch (error) {
@@ -34,8 +35,34 @@ const Login = () => {
         console.log("No token found. Redirecting to login.");
         navigate("/"); 
       }
+      
     },[navigate]);
 
+
+    const refreshAccessToken = async () => {
+      try {
+        const response = await axios.post(`${API_BASE_URL}/auth/refresh-token/`, {
+          refresh: localStorage.getItem("refreshToken"), // Include the refresh token
+        });
+  
+        if (response.status === 200) {
+          const { access } = response.data;
+          localStorage.setItem("token", access); // Update access token
+          console.log("Access token refreshed successfully.");
+        } else {
+          console.log("Failed to refresh token. Redirecting to login.");
+          localStorage.removeItem("token");
+          localStorage.removeItem("refreshToken");
+          navigate("/"); // Redirect to login
+        }
+      } catch (error) {
+        console.error("Error refreshing token:", error);
+        localStorage.removeItem("token");
+        localStorage.removeItem("refreshToken");
+        navigate("/"); // Redirect to login
+      }
+    };
+  
 
     const handleSubmit =async (e) => {
         e.preventDefault();
@@ -50,6 +77,7 @@ const Login = () => {
             console.log('Login successful:', response.data);
             console.log('Login token:', response.data.tokens.access);
             localStorage.setItem('token', response.data.tokens.access);
+            localStorage.setItem("refreshToken", response.data.tokens.refresh);
              navigate('/dashboard');
       
           } catch (err) {
