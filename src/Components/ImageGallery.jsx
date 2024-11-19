@@ -30,39 +30,6 @@ const ImageGallery = () => {
   useEffect(() => {
     fetchImages();
   }, []);
-
-  // Handle the end of a drag
-  // const handleDragEnd =async (event) => {
-  //   const { active, over } = event;
-
-  //   if (active.id !== over.id) {
-  //     const oldIndex = images.findIndex((img) => img.id === active.id);
-  //     const newIndex = images.findIndex((img) => img.id === over.id);
-  //     const reorderedImages = arrayMove(images, oldIndex, newIndex);
-
-  //     setImages(reorderedImages);
-
-  //     // Send the new order to the backend
-  //     const reorderedIds = reorderedImages.map((image) => image.id);
-  //     axios
-  //       .patch(`${API_BASE_URL}images/reorder_images/`, { order: reorderedIds },
-  //         {  headers: {
-  //               'Authorization': `Bearer ${localStorage.getItem("token")}`
-  //             }}
-  //       )
-  //       .then(response => {
-  //           console.log('Order updated');
-  //           axios.get(`${API_BASE_URL}images/`, {
-  //               headers: {
-  //                   Authorization: `Bearer ${localStorage.getItem("token")}`
-  //               }
-  //           })
-  //           .then(freshResponse => setImages(freshResponse.data))
-  //           .catch(fetchError => console.error('Error re-fetching images', fetchError));
-  //       })
-  //       .catch((error) => console.error('Error updating order', error));
-  //   }
-  // };
   const handleDragEnd = async (event) => {
     const { active, over } = event;
 
